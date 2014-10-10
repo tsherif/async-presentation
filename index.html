@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">  
+<head>
+  <meta charset="utf-8">
+  <title>Asynchronous Execution in JavaScript</title>
+  <link rel="stylesheet" href="css/reveal.min.css">
+  <link rel="stylesheet" href="css/theme/default.css" id="theme"> 
+  <script src="highlight.min.js"></script>
+  <link rel="stylesheet" href="css/default.min.css">
+  <style>
+    #web-service {
+      width: 200px;
+      height: 200px;
+      margin: 20px auto;
+    }
+
+    .reveal .slide-number {
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .reveal section img {
+      height: 130px;
+      margin-top: 30px;
+    }
+
+    .reveal .queue {
+      padding: 0.2em;
+      border: 1px solid white;
+    }
+
+    .reveal pre {
+      box-shadow: none;
+    }
+
+    .red {
+      background-color: red;
+    }
+
+    .green {
+      background-color: green;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <h1>Asynchronous Execution in JavaScript</h1>
+        <p>Tarek Sherif</p>    
+      </section>
+
+      <section>
+        <h2>JavaScript is single-threaded</h2>
+        <ul>
+          <li>JavaScript, UI and rendering share the same thread</li>
+          <li>Blocking operations will hold everything up</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Solution</h2>
+        <ul>
+          <li>
+            Make as many operations asynchronous as possible.
+            <ul>
+              <li>AJAX</li>
+              <li>UI callbacks</li>
+              <li>File I/O</li>
+              <li>Web Workers</li>
+            </ul>
+          </li>
+          <li>Basically:
+            <ul>
+              <li>Let the environment handle it</li>
+              <li>Provide a callback function to be executed at the end</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Examples</h2>
+        <pre>
+          <code class="javascript">
+  $.get("http://my-url", function(res) { 
+    console.log(res); 
+  });
+
+  $("#clicker").click(function() { 
+    console.log("I was clicked!"); 
+  });
+
+  setTimeout(function() {
+    console.log("It's time!");
+  }, 1000);
+          </code>
+        </pre>
+      </section>
+      
+      <section>
+        <h2>Non-Sequential</h2>
+        <ul>
+          <li>This requires a change in reasoning about your program</li>
+          <li>Statements don't execute sequentially</li>
+        </ul>
+      </section>  
+
+      <section>
+        <h2>Example 1</h2>
+        <h3>What will be the output?</h3>
+        <pre>
+          <code class="javascript">
+  var x;
+  setTimeout(function() {
+    x = "Hello";
+  }, 1000);
+  console.log(x);
+          </code>
+        </pre>
+      </section>
+      
+      <section>
+        <h2>Example 2</h2>
+        <h3>How about this?</h3>
+        <pre>
+          <code class="javascript">
+  var x;
+  setTimeout(function() {
+    x = "Hello";
+  }, 0);
+  console.log(x);
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <ul>
+          <li>When a callback is triggered it doesn't run immediately</li>
+          <li>It's placed on the execution queue</li>
+          <li>The environment will run queued callbacks in order</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <span class="queue red">onload()</span>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <span class="queue green">onload()</span><span class="queue red">onclick()</span>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <span class="queue green">onclick()</span><span class="queue red">setTimeout()</span>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <span class="queue green">onclick()</span><span class="queue red">setTimeout()</span><span class="queue red">onclick()</span>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <span class="queue green">setTimeout()</span><span class="queue red">onclick()</span>
+      </section>
+
+      <section>
+        <h2>JavaScript Execution Queue</h2>
+        <span class="queue green">onclick()</span>
+      </section>
+
+      <section>
+        <h2>Async Programming Hints</h2>
+        <h3>Helper async function:</h3>
+        <pre>
+          <code class="javascript">
+  // Take string and optional callback function.
+  // Wait 0-500ms.
+  // Call callback with string as arg.
+  function async(string, callback) { 
+    setTimeout(function() {
+      callback(string);
+    }, Math.random() * 500);
+  }
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Async in Order</h2>
+        <h3>Will this work?</h3>
+        <pre>
+          <code class="javascript">
+  function printString(string) { console.log(string); }
+
+  async("Print this first!", printString);
+  async("Print this second!", printString);
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Async in Order</h2>
+        <h3>Sometimes!</h3>
+          <ul>
+            <li>How can we execute them in order?</li>
+          </ul>
+      </section>
+
+      <section>
+        <h2>Async in Order</h2>
+        <pre>
+          <code class="javascript">
+  function printString(string) { console.log(string); }
+
+  async("Print this first!", function(string) {
+    printString(string);
+    async("Print this second!", printString);
+  });
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Pararellization</h2>
+        <ul>
+          <li>I want to do several asyncronous calls</li>
+          <li>Then combine their results</li>
+          <ul>
+            <li>E.g. Return the longest string</li>
+          </ul>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Pararellization</h2>
+        <pre>
+          <code class="javascript">
+  async("Why aren't we", function(string1) {
+    async("running parallel?", function(string2) {
+      var result = string1.length > string2.length ? string1 : string2; 
+      console.log(result);
+    });
+  }); 
+          </code>
+        </pre>
+      </section>
+      
+      <section>
+        <h2>Pararellization</h2>
+        <h3>How do we write the callback?</h3>
+        <pre>
+          <code class="javascript">
+  function combineResults(string) {
+    // What goes here?
+  }
+  
+  async("We are ", combineResults);
+  async("running parallel!", combineResults);
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Pararellization</h2>
+        <h3>How do we write the callback?</h3>
+        <pre>
+          <code class="javascript">
+  var num_left = 2;
+  var res = [];
+  function combineResults(string) {
+    res.push(string);
+    if (--num_left === 0) {
+      console.log(res[0].length > res[1].length ? res[0] : res[1]);
+    }
+  }
+  
+  async("We are ", combineResults);
+  async("running parallel!", combineResults);
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Pararellization</h2>
+        <ul>
+          <li>What if we want to keep things in order?</li>
+          <li>Will this work?</li>
+        </ul>
+        <pre>
+          <code class="javascript">
+  var num_left = 2;
+  var strings = ["Keep us", "in order"];
+  var res = [];
+  var i;
+
+  for (i = 0; i &lt; num_left; i++) {
+    async(strings[i], function(string) {
+      res[i] = string;
+      if (--num_left === 0) {
+        console.log(res.join(" "));
+      }
+    });
+  }
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Pararellization</h2>
+        <h3>Create a closure!</h3>
+        <pre>
+          <code class="javascript">
+  var num_left = 2;
+  var strings = ["Keep us", "in order"];
+  var res = [];
+  var i;
+
+  for (i = 0; i &lt; num_left; i++) {
+    (function(i){
+      async(strings[i], function(string) {
+        res[i] = string;
+        if (--num_left === 0) {
+          console.log(res.join(" "));
+        }
+      });
+    })(i);
+  }
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Web Workers</h2>
+        <h3>True multithreading</h3>
+        <pre>
+          <code class="javascript">
+  var worker = new Worker("url/of/worker.js");
+
+  worker.addEventListener("message", function(event) {
+    console.log(event.data);
+  });
+
+  worker.postMessage("Hello");
+
+  // ---- IN THE WORKER SCRIPT ----
+  self.addEventListener("message", function(event) {
+    self.postMessage("Got message: " + event.data)
+  });
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Callback Hell</h2>
+        <h3>When async calls are interdependent</h3>
+        <pre>
+          <code class="javascript">
+  async("Step 1", function(result) {
+    console.log(result + " done!");
+    async("Step 2", function(result) {
+      console.log(result + " done!");
+      async("Step 3", function(result) {
+        console.log(result + " done!");
+      });
+    });
+  });
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Callback Hell</h2>
+        <h3>Mitigate by pulling out callbacks</h3>
+        <pre>
+          <code class="javascript">
+  async("Step 1", doneStep1);
+  
+  function doneStep1(result) {
+    console.log(result + " done!");
+    async("Step 2", doneStep2);
+  } 
+  
+  function doneStep2(result) {
+    console.log(result + " done!");
+    async("Step 3", doneStep3);
+  }
+  
+  function doneStep3(result) {
+    console.log(result + " done!");
+  }
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>EcmaScript 6</h2>
+        <h3>Next version of JavaScript</h3>
+        <ul>
+          <li>
+            Two new constructs to help with async programming
+            <ul>
+              <li>Promises</li>
+              <li>Generators</li>
+            </ul>
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Promises</h2>
+        <h3>Return an object that handles callbacks</h3>
+        <pre>
+          <code class="javascript">
+  function get(url) {
+    return new Promise(ajaxResolutionFunction);
+  }
+  
+  get("http://first-url").then(function(result) {
+    console.log(result);
+    return get("http://next-url");
+  }).then(function(result) {
+    console.log(result);
+    return get("http://last-url");
+  }).then(function(result) {
+    console.log(result);
+  })
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h2>Generators</h2>
+        <h3>Crazziness</h3>
+        <pre>
+          <code class="javascript">
+  fancyAsync(function*(handleResult) {
+    var res  = yield async("It's as if ", handleResult); 
+    res     += yield async("I'm running ", handleResult);
+    res     += yield async("synchronously!!!", handleResult);
+    console.log(res);
+  });
+
+  // Where the magic happens.
+  function fancyAsync(generator) {
+    var g = generator(handleResult);
+    g.next();
+    
+    function handleResult(response) {
+      g.next(response); 
+    }
+  }
+          </code>
+        </pre>
+      </section>
+
+      <section>
+        <h1>Thanks!</h1>
+      </section>
+    </div>
+  </div>
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.min.js"></script>
+  <script src="js/highlight.min.js"></script>
+  <script>
+    Reveal.initialize({
+      history: true,
+      slideNumber: true,
+      controls: false,
+      transition: "none"
+    });
+    hljs.initHighlightingOnLoad();
+  </script>
+</body>
+</html>s
