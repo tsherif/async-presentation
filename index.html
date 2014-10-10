@@ -139,7 +139,7 @@
         <h2>JavaScript Execution Queue</h2>
         <ul>
           <li>When a callback is triggered it doesn't run immediately</li>
-          <li>It's placed on the execution queue</li>
+          <li>It's placed in the execution queue</li>
           <li>The environment will run queued callbacks in order</li>
         </ul>
       </section>
@@ -181,7 +181,7 @@
           <code class="javascript">
   // Take string and optional callback function.
   // Wait 0-500ms.
-  // Call callback with string as arg.
+  // Call callback with string as argument.
   function async(string, callback) { 
     setTimeout(function() {
       callback(string);
@@ -227,9 +227,9 @@
       </section>
 
       <section>
-        <h2>Pararellization</h2>
+        <h2>Parallelization</h2>
         <ul>
-          <li>I want to do several asyncronous calls</li>
+          <li>I want to do several independent asynchronous calls</li>
           <li>Then combine their results</li>
           <ul>
             <li>E.g. Return the longest string</li>
@@ -238,7 +238,7 @@
       </section>
 
       <section>
-        <h2>Pararellization</h2>
+        <h2>Parallelization</h2>
         <pre>
           <code class="javascript">
   async("Why aren't we", function(string1) {
@@ -252,7 +252,7 @@
       </section>
       
       <section>
-        <h2>Pararellization</h2>
+        <h2>Parallelization</h2>
         <h3>How do we write the callback?</h3>
         <pre>
           <code class="javascript">
@@ -267,7 +267,7 @@
       </section>
 
       <section>
-        <h2>Pararellization</h2>
+        <h2>Parallelization</h2>
         <h3>How do we write the callback?</h3>
         <pre>
           <code class="javascript">
@@ -287,7 +287,7 @@
       </section>
 
       <section>
-        <h2>Pararellization</h2>
+        <h2>Parallelization</h2>
         <ul>
           <li>What if we want to keep things in order?</li>
           <li>Will this work?</li>
@@ -312,7 +312,7 @@
       </section>
 
       <section>
-        <h2>Pararellization</h2>
+        <h2>Parallelization</h2>
         <h3>Create a closure!</h3>
         <pre>
           <code class="javascript">
@@ -337,7 +337,7 @@
 
       <section>
         <h2>Web Workers</h2>
-        <h3>True multithreading</h3>
+        <h3>True multi-threading</h3>
         <pre>
           <code class="javascript">
   var worker = new Worker("url/of/worker.js");
@@ -436,7 +436,7 @@
 
       <section>
         <h2>Generators</h2>
-        <h3>Crazziness</h3>
+        <h3>Craziness</h3>
         <pre>
           <code class="javascript">
   fancyAsync(function*(handleResult) {
